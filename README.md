@@ -35,13 +35,13 @@ Download the 'snapclient.tcz' extension provided here and transfer it to your Pi
 SSH into your PiCore installation (User: tc, Password: PiCore) and run the following commands:
 
     $ mv /tmp/snapclient.tcz /mnt/mmcblk0p2/tce/optional/
+    $ echo "snapclient.tcz" >> /mnt/mmcblk0p2/tce/onboot.lst
     $ echo "usr/local/etc/init.d/snapclient" >> /opt/.filetool.lst
+    $ echo "/usr/local/etc/init.d/snapclient start" >> /opt/bootlocal.sh
     $ tce-load -wi libvorbis
     $ tce-load -wi libogg
     $ tce-load -wi flac
     $ tce-load -wi avahi
-    $ echo "snapclient.tcz" >> /mnt/mmcblk0p2/tce/onboot.lst
-    $ echo "/usr/local/etc/init.d/snapclient start" >> /opt/bootlocal.sh
     $ sudo filetool.sh -b
     $ sudo reboot
     
