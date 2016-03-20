@@ -39,6 +39,7 @@ SSH into your PiCore installation (User: tc, Password: PiCore) and run the follo
     $ tce-load -wi libvorbis
     $ tce-load -wi libogg
     $ tce-load -wi flac
+    $ tce-load -wi avahi
     $ echo "snapclient.tcz" >> /mnt/mmcblk0p2/tce/onboot.lst
     $ echo "/usr/local/etc/init.d/snapclient start" >> /opt/bootlocal.sh
     $ sudo filetool.sh -b
