@@ -1,4 +1,5 @@
 # snapcast-tcz
+<<<<<<< HEAD
 -----
 
 A PiCore Snapcast extension for the RaspberryPi.
@@ -52,3 +53,7 @@ Voilà! Play some music via Snapserver and the music will be played through your
 - [ ] Improve init script 
 - [ ] Allow snapclient configuration via PiCore web-interface
 - [ ] Resolve dependency issues on PiCore and do not compile statically
+=======
+A Snapcast PiCore extension
+test
+>>>>>>> master
