@@ -50,6 +50,7 @@ SSH into your PiCore Player (User: tc, Password: piCore) and run the following c
 Voilà! Play some music via Snapserver and the music will be played through your PiCore player.
 
 Hint: When running a regular PiCore installation, you might be required to install the avahi dependency.
+
     $ wget http://ralph_irving.users.sourceforge.net/pico/avahi.tcz /mnt/mmcblk0p2/tce/optional/
 
 ## Todo
