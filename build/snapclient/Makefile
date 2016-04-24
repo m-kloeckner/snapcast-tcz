@@ -1,4 +1,4 @@
-VERSION = 0.4.1
+VERSION = 0.6.0
 TARGET  = snapclient
 SHELL = /bin/bash
 
@@ -9,22 +9,47 @@ else
   TARGET_DIR ?= /usr
 endif
 
-CXX     = /usr/bin/g++
-CFLAGS  = -std=c++0x -static-libgcc -static-libstdc++ -Wall -Wno-unused-function -O3 -pthread -DVERSION=\"$(VERSION)\" -I.. #-static -static-libgcc -static-libstdc++
-LDFLAGS = -Wl,-Bstatic -lrt -lboost_system -lboost_program_options -Wl,-Bdynamic -lasound -logg -lvorbis -lFLAC -lavahi-client -lavahi-common
-#LDFLAGS = -lrt -lboost_system -lboost_program_options -lasound -logg -lvorbis -lFLAC -lavahi-client -lavahi-common
 
-OBJ = snapClient.o stream.o alsaPlayer.o clientConnection.o timeProvider.o decoder/oggDecoder.o decoder/pcmDecoder.o decoder/flacDecoder.o controller.o browseAvahi.o ../message/pcmChunk.o ../common/log.o ../message/sampleFormat.o
+CXXFLAGS += $(ADD_CFLAGS) -std=c++0x -Wall -Wno-unused-function -O3 -pthread -DASIO_STANDALONE -DVERSION=\"$(VERSION)\" -I. -I.. -I../externals/asio/asio/include -I../externals/popl/include
+OBJ       = snapClient.o stream.o clientConnection.o timeProvider.o player/player.o decoder/pcmDecoder.o decoder/flacDecoder.o controller.o ../message/pcmChunk.o ../common/log.o ../common/sampleFormat.o
+
+ifeq ($(TARGET), ANDROID)
+
+CXX      = $(NDK_DIR)/bin/arm-linux-androideabi-g++
+STRIP	 = $(NDK_DIR)/bin/arm-linux-androideabi-strip
+CXXFLAGS += -DANDROID -DNO_CPP11_STRING -fPIC -DHAS_OPENSL -I$(NDK_DIR)/include
+LDFLAGS  = -L$(NDK_DIR)/lib -pie -lFLAC -lOpenSLES
+OBJ      += player/openslPlayer.o
+
+else ifeq ($(TARGET), OPENWRT)
+
+STRIP	 = echo
+CXXFLAGS += -DIS_BIG_ENDIAN -DNO_CPP11_STRING -DHAS_TREMOR -DHAS_ALSA -DHAS_AVAHI -DHAS_DAEMON
+LDFLAGS  = -lasound -logg -lvorbisidec -lFLAC -lavahi-client -lavahi-common -latomic
+OBJ      += player/alsaPlayer.o decoder/oggDecoder.o browseAvahi.o
+
+else
+
+CXX      = /usr/bin/g++
+STRIP	 = strip
+CXXFLAGS += -static-libgcc -static-libstdc++ -DHAS_OGG -DHAS_ALSA -DHAS_AVAHI -DHAS_DAEMON
+LDFLAGS  = -Wl,-Bstatic -lrt -Wl,-Bdynamic -lasound -logg -lvorbis -Wl,-Bstatic -lFLAC -Wl,-Bdynamic -lavahi-client -lavahi-common
+OBJ      += player/alsaPlayer.o decoder/oggDecoder.o browseAvahi.o
+
+endif
+
+
 BIN = snapclient
+
 
 all:	$(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CXX) $(CFLAGS) -o $(BIN) $(OBJ) $(LDFLAGS)
-	strip $(BIN)
+	$(CXX) $(CXXFLAGS) -o $(BIN) $(OBJ) $(LDFLAGS)
+	$(STRIP) $(BIN)
 
 %.o: %.cpp
-	$(CXX) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(BIN) $(OBJ) *~
@@ -32,12 +57,8 @@ clean:
 .PHONY: dpkg
 #sudo apt-get install build-essential debhelper dh-make dh-systemd quilt fakeroot lintian
 dpkg:
-	cp ../init.scripts/sysv/$(BIN) debian/$(BIN).init
-	cp ../init.scripts/systemd/$(BIN).service debian/$(BIN).service
 	dpkg-buildpackage -rfakeroot -b
 	dh_clean
-	rm -f debian/$(BIN).service
-	rm -f debian/$(BIN).init
 
 ifdef DESTDIR
 
@@ -64,14 +85,16 @@ endif
 
 installsystemd:
 	@echo using systemd; \
-	cp ../init.scripts/systemd/$(BIN).service /lib/systemd/system/$(BIN).service; \
+	cp debian/$(BIN).service /lib/systemd/system/$(BIN).service; \
+	cp debian/$(BIN).default /etc/default/$(BIN); \
 	systemctl daemon-reload; \
 	systemctl enable $(BIN); \
 	systemctl start $(BIN); \
 
 installsysv:
 	@echo using sysv; \
-	cp ../init.scripts/sysv/$(BIN) /etc/init.d/$(BIN); \
+	cp debian/$(BIN).init /etc/init.d/$(BIN); \
+	cp debian/$(BIN).default /etc/default/$(BIN); \
 	update-rc.d $(BIN) defaults; \
 	/etc/init.d/$(BIN) start; \
 
@@ -93,6 +116,7 @@ uninstallsysv:
 	killall -9 $(BIN); \
 	rm -f /usr/sbin/$(BIN); \
 	rm -f /etc/init.d/$(BIN); \
+	rm -f /etc/default/$(BIN); \
 	update-rc.d -f $(BIN) remove; \
 
 uninstallsystemd:
@@ -101,5 +125,6 @@ uninstallsystemd:
 	killall -9 $(BIN); \
 	rm -f /usr/sbin/$(BIN); \
 	rm -f /lib/systemd/system/$(BIN).service; \
+	rm -f /etc/default/$(BIN); \
 	systemctl daemon-reload; \
 
