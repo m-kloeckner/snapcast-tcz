@@ -2,9 +2,10 @@
 # snapcast-tcz
 -----
 
-A PiCore Snapcast extension for the RaspberryPi.
+A Snapcast exentions for the PiCore Player running on the RaspberryPi.
 
-This tcz extension allows to run the Snapcast's client component in a PiCore installation.
+This tcz extension allows to run the Snapcast's client component in a PiCore Player installation. (see https://sites.google.com/site/picoreplayer/)
+This extension should also run on a regular PiCore installation. Maybe you will need to install further dependencies. If yes, see the installation instructions below.
 
 
 ## Installation
@@ -29,11 +30,11 @@ Download/git clone the 'tcz' folder structure provided here, replace the 'snapcl
 Then follow the steps in 'Prebuild'.
 
 ## Prebuild
-Download the 'snapclient.tcz' extension provided here and transfer it to your PiCore extension.
+Download the 'snapclient.tcz' extension provided here and transfer it to your PiCore Player.
 
     $ scp snapclient.tcz tc@IP_ADDRESS:/tmp
     
-SSH into your PiCore installation (User: tc, Password: PiCore) and run the following commands:
+SSH into your PiCore Player (User: tc, Password: piCore) and run the following commands:
 
     $ mv /tmp/snapclient.tcz /mnt/mmcblk0p2/tce/optional/
     $ echo "snapclient.tcz" >> /mnt/mmcblk0p2/tce/onboot.lst
@@ -48,8 +49,12 @@ SSH into your PiCore installation (User: tc, Password: PiCore) and run the follo
     
 Voilà! Play some music via Snapserver and the music will be played through your PiCore player.
 
+Hint: When running a regular PiCore installation, you might be required to install the avahi dependency.
+    $ wget http://ralph_irving.users.sourceforge.net/pico/avahi.tcz /mnt/mmcblk0p2/tce/optional/
+
 ## Todo
 
+- [x] Update to snapclient 0.6
 - [ ] Improve init script 
 - [ ] Allow snapclient configuration via PiCore web-interface
 - [ ] Resolve dependency issues on PiCore and do not compile staticall
