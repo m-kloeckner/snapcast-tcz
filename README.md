@@ -21,7 +21,7 @@ Download/git clone the latest source from the Snapcast Github repository and rep
 
 Then run:
 
-    $ sudo make snapclient
+    $ sudo make client
 
 Download/git clone the 'tcz' folder structure provided here, replace the 'snapclient' binary in 'tcz/usr/sbin/' with the binary you compiled yourself and wrap the complete 'tcz' folder with the following command:
 
